@@ -36,19 +36,23 @@
             <div class="player-config white-config">
                 <h3><span class="player-indicator white-dot"></span> Player 1 (White)</h3>
                 <div class="input-group">
-                    <label for="p1-api-key">Gemini API Key</label>
+                    <label for="p1-provider">API Provider</label>
+                    <select id="p1-provider" onchange="updateProviderModels(1)">
+                        <option value="gemini">Gemini</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="p1-api-key">API Key</label>
                     <div class="password-wrapper">
-                        <input type="password" id="p1-api-key" placeholder="AIzaSy...">
+                        <input type="password" id="p1-api-key" placeholder="Enter API Key...">
                         <button class="toggle-password" onclick="togglePassword('p1-api-key')"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
                 <div class="input-group">
                     <label for="p1-model">Model</label>
                     <select id="p1-model">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
                 <div class="input-group">
@@ -61,19 +65,23 @@
             <div class="player-config black-config">
                 <h3><span class="player-indicator black-dot"></span> Player 2 (Black)</h3>
                 <div class="input-group">
-                    <label for="p2-api-key">Gemini API Key</label>
+                    <label for="p2-provider">API Provider</label>
+                    <select id="p2-provider" onchange="updateProviderModels(2)">
+                        <option value="gemini">Gemini</option>
+                        <option value="openai">OpenAI</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="p2-api-key">API Key</label>
                     <div class="password-wrapper">
-                        <input type="password" id="p2-api-key" placeholder="AIzaSy...">
+                        <input type="password" id="p2-api-key" placeholder="Enter API Key...">
                         <button class="toggle-password" onclick="togglePassword('p2-api-key')"><i class="fa-solid fa-eye"></i></button>
                     </div>
                 </div>
                 <div class="input-group">
                     <label for="p2-model">Model</label>
                     <select id="p2-model">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        <!-- Populated dynamically -->
                     </select>
                 </div>
                 <div class="input-group">
