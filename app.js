@@ -16,6 +16,22 @@ const PIECE_SVGS = {
     'K': `<svg viewBox="0 0 45 45"><path d="M12 36h21v-3H12v3zm10.5-28v3h-3v3h3v3h3V9h3V6h-3V3h-3v3zm-8 14c-2 2-3 5-3 8h22c0-3-1-6-3-8l-3.5 3.5-4.5-4.5-4.5 4.5L14.5 22z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`
 };
 
+// Provider Models Configuration
+const PROVIDER_MODELS = {
+    gemini: [
+        { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+        { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+        { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+        { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' }
+    ],
+    openai: [
+        { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+        { value: 'gpt-4o', label: 'GPT-4o' },
+        { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
+        { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' }
+    ]
+};
+
 // Global state variables
 let game = null;
 let autoplayTimer = null;
@@ -32,6 +48,8 @@ const btnReset = document.getElementById('btn-reset');
 const battleLog = document.getElementById('battle-log');
 const pgnHistory = document.getElementById('pgn-history');
 
+const p1ProviderEl = document.getElementById('p1-provider');
+const p2ProviderEl = document.getElementById('p2-provider');
 const p1ApiKeyEl = document.getElementById('p1-api-key');
 const p2ApiKeyEl = document.getElementById('p2-api-key');
 const p1ModelEl = document.getElementById('p1-model');
@@ -43,18 +61,50 @@ const p2TempVal = document.getElementById('p2-temp-val');
 const autoplayDelayEl = document.getElementById('autoplay-delay');
 const showThinkingEl = document.getElementById('show-thinking');
 
+// Handle provider changes
+function updateProviderModels(playerNum) {
+    const providerEl = document.getElementById(`p${playerNum}-provider`);
+    const modelEl = document.getElementById(`p${playerNum}-model`);
+    const selectedProvider = providerEl.value;
+    
+    modelEl.innerHTML = '';
+    const models = PROVIDER_MODELS[selectedProvider];
+    models.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m.value;
+        option.textContent = m.label;
+        modelEl.appendChild(option);
+    });
+
+    // Populate corresponding stored key/model if exists
+    const storedKey = localStorage.getItem(`${selectedProvider}_key`);
+    const apiKeyEl = document.getElementById(`p${playerNum}-api-key`);
+    if (storedKey) {
+        apiKeyEl.value = storedKey;
+    } else {
+        apiKeyEl.value = '';
+    }
+}
+
 // Initialize settings value display & store locally
 p1TempEl.addEventListener('input', (e) => p1TempVal.textContent = e.target.value);
 p2TempEl.addEventListener('input', (e) => p2TempVal.textContent = e.target.value);
 
-// Load keys from localStorage if they exist
+// Load settings from localStorage if they exist
 window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('gemini_p1_key')) {
-        p1ApiKeyEl.value = localStorage.getItem('gemini_p1_key');
+    // Initial populate
+    updateProviderModels(1);
+    updateProviderModels(2);
+    
+    if (localStorage.getItem('p1_provider')) {
+        p1ProviderEl.value = localStorage.getItem('p1_provider');
+        updateProviderModels(1);
     }
-    if (localStorage.getItem('gemini_p2_key')) {
-        p2ApiKeyEl.value = localStorage.getItem('gemini_p2_key');
+    if (localStorage.getItem('p2_provider')) {
+        p2ProviderEl.value = localStorage.getItem('p2_provider');
+        updateProviderModels(2);
     }
+    
     createInitialBoard();
 });
 
@@ -158,13 +208,15 @@ btnStart.addEventListener('click', () => {
     const key2 = p2ApiKeyEl.value.trim();
     
     if (!key1 || !key2) {
-        alert("Please enter both White (P1) and Black (P2) Gemini API Keys.");
+        alert("Please enter API Keys for both White and Black.");
         return;
     }
 
-    // Save to localStorage
-    localStorage.setItem('gemini_p1_key', key1);
-    localStorage.setItem('gemini_p2_key', key2);
+    // Save configurations to localStorage
+    localStorage.setItem(`${p1ProviderEl.value}_key`, key1);
+    localStorage.setItem(`${p2ProviderEl.value}_key`, key2);
+    localStorage.setItem('p1_provider', p1ProviderEl.value);
+    localStorage.setItem('p2_provider', p2ProviderEl.value);
 
     game = new Chess();
     lastMoveSquares = [];
@@ -174,11 +226,15 @@ btnStart.addEventListener('click', () => {
     btnAutoplay.disabled = false;
     btnReset.disabled = false;
     
-    // Reset configurations so they can't be changed during active gameplay
+    // Disable inputs during active gameplay
+    p1ProviderEl.disabled = true;
+    p2ProviderEl.disabled = true;
     p1ApiKeyEl.disabled = true;
     p2ApiKeyEl.disabled = true;
+    p1ModelEl.disabled = true;
+    p2ModelEl.disabled = true;
     
-    addLogEntry('system', 'Game started. The battlefield is set. White (Player 1) is to move first.');
+    addLogEntry('system', 'Game started. The battlefield is set. White (Player 1) to move first.');
     updateGameUIState();
 });
 
@@ -193,8 +249,12 @@ btnReset.addEventListener('click', () => {
     btnAutoplay.disabled = true;
     btnReset.disabled = true;
     
+    p1ProviderEl.disabled = false;
+    p2ProviderEl.disabled = false;
     p1ApiKeyEl.disabled = false;
     p2ApiKeyEl.disabled = false;
+    p1ModelEl.disabled = false;
+    p2ModelEl.disabled = false;
     
     createInitialBoard();
     
@@ -244,11 +304,12 @@ async function makeNextAIMove() {
     const isWhite = activeTurn === 'w';
     const prefix = isWhite ? 'White' : 'Black';
     
+    const provider = isWhite ? p1ProviderEl.value : p2ProviderEl.value;
     const apiKey = isWhite ? p1ApiKeyEl.value.trim() : p2ApiKeyEl.value.trim();
     const model = isWhite ? p1ModelEl.value : p2ModelEl.value;
     const temp = parseFloat(isWhite ? p1TempEl.value : p2TempEl.value);
     
-    addLogEntry('system', `${prefix} Engine is analyzing the position...`);
+    addLogEntry('system', `${prefix} Engine (${provider.toUpperCase()}) is analyzing...`);
     
     try {
         const legalMoves = game.moves();
@@ -262,9 +323,20 @@ You MUST ONLY choose a move that is listed in the legal moves list below. Any mo
 
 Current Position (FEN): ${fen}
 Game History (PGN): ${pgn}
-Available Legal Moves: ${legalMoves.join(', ')}`;
+Available Legal Moves: ${legalMoves.join(', ')}
 
-        const responseText = await callGeminiAPI(apiKey, model, systemPrompt, temp);
+Format your output exactly as JSON:
+{
+  "thought": "your thoughts",
+  "move": "your chosen move"
+}`;
+
+        let responseText;
+        if (provider === 'gemini') {
+            responseText = await callGeminiAPI(apiKey, model, systemPrompt, temp);
+        } else {
+            responseText = await callOpenAIAPI(apiKey, model, systemPrompt, temp);
+        }
         
         let moveData;
         try {
@@ -289,7 +361,6 @@ Available Legal Moves: ${legalMoves.join(', ')}`;
         
         // Verify legal move
         if (!legalMoves.includes(chosenMove)) {
-            // Fallback: search if matches case-insensitively or with minor string differences
             const matched = legalMoves.find(m => m.toLowerCase() === chosenMove.toLowerCase());
             if (matched) {
                 chosenMove = matched;
@@ -380,6 +451,48 @@ async function callGeminiAPI(apiKey, model, systemPrompt, temperature) {
     }
 
     return data.candidates[0].content.parts[0].text;
+}
+
+// Call OpenAI API
+async function callOpenAIAPI(apiKey, model, systemPrompt, temperature) {
+    const url = 'https://api.openai.com/v1/chat/completions';
+    
+    const requestBody = {
+        model: model,
+        messages: [
+            {
+                role: "system",
+                content: systemPrompt
+            },
+            {
+                role: "user",
+                content: "Please select your next move and return your strategic thoughts and move selection in JSON format."
+            }
+        ],
+        temperature: temperature,
+        response_format: { type: "json_object" }
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`OpenAI API Error: Status ${response.status} - ${errText}`);
+    }
+
+    const data = await response.json();
+    if (!data.choices || data.choices.length === 0 || !data.choices[0].message) {
+        throw new Error("No response choices returned from OpenAI API");
+    }
+
+    return data.choices[0].message.content;
 }
 
 // Log formatting and auto-scrolling
