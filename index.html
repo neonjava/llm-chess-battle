@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Chess Battleground</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chess.js for logic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-chess-knight logo-icon"></i>
+            <h1>LLM Chess <span>Battleground</span></h1>
+        </div>
+        <p class="subtitle">Watch two AI brains fight for supremacy on the 64 squares</p>
+    </header>
+
+    <main class="container">
+        <!-- Configuration Panel (Left) -->
+        <section class="panel config-panel">
+            <h2><i class="fa-solid fa-sliders"></i> Engine Configuration</h2>
+            
+            <div class="player-config white-config">
+                <h3><span class="player-indicator white-dot"></span> Player 1 (White)</h3>
+                <div class="input-group">
+                    <label for="p1-api-key">Gemini API Key</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="p1-api-key" placeholder="AIzaSy...">
+                        <button class="toggle-password" onclick="togglePassword('p1-api-key')"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="p1-model">Model</label>
+                    <select id="p1-model">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="p1-temp">Temperature (Creativity)</label>
+                    <input type="range" id="p1-temp" min="0" max="1" step="0.1" value="0.2">
+                    <span class="range-value" id="p1-temp-val">0.2</span>
+                </div>
+            </div>
+
+            <div class="player-config black-config">
+                <h3><span class="player-indicator black-dot"></span> Player 2 (Black)</h3>
+                <div class="input-group">
+                    <label for="p2-api-key">Gemini API Key</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="p2-api-key" placeholder="AIzaSy...">
+                        <button class="toggle-password" onclick="togglePassword('p2-api-key')"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="p2-model">Model</label>
+                    <select id="p2-model">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Default)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="p2-temp">Temperature (Creativity)</label>
+                    <input type="range" id="p2-temp" min="0" max="1" step="0.1" value="0.2">
+                    <span class="range-value" id="p2-temp-val">0.2</span>
+                </div>
+            </div>
+
+            <div class="global-settings">
+                <h3><i class="fa-solid fa-gear"></i> Settings</h3>
+                <div class="checkbox-group">
+                    <label class="switch-label">
+                        <input type="checkbox" id="show-thinking" checked>
+                        <span class="switch-slider"></span>
+                        Show Thinking Process
+                    </label>
+                </div>
+                <div class="input-group">
+                    <label for="autoplay-delay">Auto-play Delay (seconds)</label>
+                    <input type="number" id="autoplay-delay" min="1" max="15" value="3">
+                </div>
+            </div>
+        </section>
+
+        <!-- Chessboard and Controls (Center) -->
+        <section class="board-area">
+            <div class="status-banner" id="game-status">
+                Configure your API keys and press Start Game!
+            </div>
+
+            <div class="chessboard-wrapper">
+                <div class="board-outer">
+                    <!-- Files labels top -->
+                    <div class="coordinate-row top-coords">
+                        <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span>
+                    </div>
+                    <div class="board-inner-wrapper">
+                        <!-- Ranks labels left -->
+                        <div class="coordinate-col left-coords">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        
+                        <div id="board" class="chessboard">
+                            <!-- JS will populate squares -->
+                        </div>
+
+                        <!-- Ranks labels right -->
+                        <div class="coordinate-col right-coords">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                    </div>
+                    <!-- Files labels bottom -->
+                    <div class="coordinate-row bottom-coords">
+                        <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <button id="btn-start" class="btn primary-btn"><i class="fa-solid fa-play"></i> Start Game</button>
+                <button id="btn-next" class="btn secondary-btn" disabled><i class="fa-solid fa-forward-step"></i> Next Move</button>
+                <button id="btn-autoplay" class="btn secondary-btn" disabled><i class="fa-solid fa-forward"></i> Auto Play</button>
+                <button id="btn-reset" class="btn danger-btn" disabled><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            </div>
+        </section>
+
+        <!-- Battle log & PGN (Right) -->
+        <section class="panel battle-panel">
+            <h2><i class="fa-solid fa-scroll"></i> Battle Log</h2>
+            <div class="log-container" id="battle-log">
+                <div class="log-entry system">
+                    Welcome to LLM Chess Battleground. Add Gemini API keys to begin.
+                </div>
+            </div>
+
+            <h2><i class="fa-solid fa-list-ol"></i> Move History</h2>
+            <div class="pgn-container" id="pgn-history">
+                <div class="empty-state">No moves played yet</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built with <i class="fa-solid fa-heart" style="color: var(--danger-color)"></i> using modern Vanilla CSS and JS.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
