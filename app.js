@@ -1,20 +1,11 @@
-// SVG Assets for Chess Pieces (styled with sleek dark/light theme gradients)
-const PIECE_SVGS = {
-    'p': `<svg viewBox="0 0 45 45"><path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-.83.62-1.41 1.61-1.41 2.72 0 1.93 1.57 3.5 3.5 3.5h4c1.93 0 3.5-1.57 3.5-3.5 0-1.11-.58-2.1-1.41-2.72C28.06 24.84 29 23.03 29 21c0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    'r': `<svg viewBox="0 0 45 45"><path d="M9 39h27v-3H9v3zm3-13v7h21v-7H12zm2.5-11h16l1.5 8h-19l1.5-8zM12 9v4h4V9h3v4h7V9h3v4h4V9h3v5H9V9h3z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    'n': `<svg viewBox="0 0 45 45"><path d="M22 10c-5 0-10 3-10 8 0 3 1.5 6 3.5 7.5c-1.5 1-2.5 3-2.5 4.5 0 3.5 3 6 8 6h8c3.5 0 6-3 6-6 0-3.5-3-7-6-8.5.5-1 1-2.5 1-4 0-5.5-4-7.5-8-7.5z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    'b': `<svg viewBox="0 0 45 45"><path d="M9 36h27v-3H9v3zm13.5-27c-4 0-8 4-8 10 0 3 1 6 3 8l3.5 3.5-1.5 1.5h6l-1.5-1.5 3.5-3.5c2-2 3-5 3-8 0-6-4-10-8-10z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    'q': `<svg viewBox="0 0 45 45"><path d="M9 37h27v-3H9v3zm3.5-20l3-10 6 10 6-10 6 10 3-10 3 10-27 0zm1.5 15h21v-4H14v4z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    'k': `<svg viewBox="0 0 45 45"><path d="M12 36h21v-3H12v3zm10.5-28v3h-3v3h3v3h3V9h3V6h-3V3h-3v3zm-8 14c-2 2-3 5-3 8h22c0-3-1-6-3-8l-3.5 3.5-4.5-4.5-4.5 4.5L14.5 22z" fill="#f8fafc" stroke="#1e293b" stroke-width="1.5"/></svg>`,
-    
-    // Black pieces (styled darker with accent border)
-    'P': `<svg viewBox="0 0 45 45"><path d="M22.5 9c-2.21 0-4 1.79-4 4 0 .89.29 1.71.78 2.38C17.33 16.5 16 18.59 16 21c0 2.03.94 3.84 2.41 5.03-.83.62-1.41 1.61-1.41 2.72 0 1.93 1.57 3.5 3.5 3.5h4c1.93 0 3.5-1.57 3.5-3.5 0-1.11-.58-2.1-1.41-2.72C28.06 24.84 29 23.03 29 21c0-2.41-1.33-4.5-3.28-5.62.49-.67.78-1.49.78-2.38 0-2.21-1.79-4-4-4z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`,
-    'R': `<svg viewBox="0 0 45 45"><path d="M9 39h27v-3H9v3zm3-13v7h21v-7H12zm2.5-11h16l1.5 8h-19l1.5-8zM12 9v4h4V9h3v4h7V9h3v4h4V9h3v5H9V9h3z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`,
-    'N': `<svg viewBox="0 0 45 45"><path d="M22 10c-5 0-10 3-10 8 0 3 1.5 6 3.5 7.5c-1.5 1-2.5 3-2.5 4.5 0 3.5 3 6 8 6h8c3.5 0 6-3 6-6 0-3.5-3-7-6-8.5.5-1 1-2.5 1-4 0-5.5-4-7.5-8-7.5z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`,
-    'B': `<svg viewBox="0 0 45 45"><path d="M9 36h27v-3H9v3zm13.5-27c-4 0-8 4-8 10 0 3 1 6 3 8l3.5 3.5-1.5 1.5h6l-1.5-1.5 3.5-3.5c2-2 3-5 3-8 0-6-4-10-8-10z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`,
-    'Q': `<svg viewBox="0 0 45 45"><path d="M9 37h27v-3H9v3zm3.5-20l3-10 6 10 6-10 6 10 3-10 3 10-27 0zm1.5 15h21v-4H14v4z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`,
-    'K': `<svg viewBox="0 0 45 45"><path d="M12 36h21v-3H12v3zm10.5-28v3h-3v3h3v3h3V9h3V6h-3V3h-3v3zm-8 14c-2 2-3 5-3 8h22c0-3-1-6-3-8l-3.5 3.5-4.5-4.5-4.5 4.5L14.5 22z" fill="#312e81" stroke="#a855f7" stroke-width="1.5"/></svg>`
+// Unicode Assets for Chess Pieces (styled clean via CSS)
+const PIECE_UNICODE = {
+    // White pieces (Uppercase in FEN)
+    'P': '♟', 'R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚',
+    // Black pieces (Lowercase in FEN)
+    'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚'
 };
+
 
 // Provider Models Configuration
 const PROVIDER_MODELS = {
@@ -209,8 +200,9 @@ function drawPieces() {
                 const square = document.querySelector(`[data-square="${sqName}"]`);
                 if (square) {
                     const pieceEl = document.createElement('div');
-                    pieceEl.className = 'piece';
-                    pieceEl.innerHTML = PIECE_SVGS[char];
+                    const isWhitePiece = char === char.toUpperCase();
+                    pieceEl.className = `piece ${isWhitePiece ? 'white-piece' : 'black-piece'}`;
+                    pieceEl.textContent = PIECE_UNICODE[char];
                     square.appendChild(pieceEl);
                 }
                 col++;
