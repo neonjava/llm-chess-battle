@@ -433,7 +433,7 @@ btnNext.addEventListener('click', () => {
 });
 
 // Call Gemini API
-async function callGeminiAPI(apiKey, model, systemPrompt, temperature) {
+async function callGeminiAPI(apiKey, model, systemPrompt, temperature, retryCount = 0) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     
     const requestBody = {
@@ -465,6 +465,14 @@ async function callGeminiAPI(apiKey, model, systemPrompt, temperature) {
         body: JSON.stringify(requestBody)
     });
 
+    if (response.status === 429) {
+        if (retryCount < 3) {
+            addLogEntry('system', `Gemini Rate Limit (429) hit. Waiting 10 seconds to retry... (Attempt ${retryCount + 1}/3)`);
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            return callGeminiAPI(apiKey, model, systemPrompt, temperature, retryCount + 1);
+        }
+    }
+
     if (!response.ok) {
         const errText = await response.text();
         throw new Error(`Gemini API Error: Status ${response.status} - ${errText}`);
@@ -479,7 +487,7 @@ async function callGeminiAPI(apiKey, model, systemPrompt, temperature) {
 }
 
 // Call OpenAI API
-async function callOpenAIAPI(apiKey, model, systemPrompt, temperature) {
+async function callOpenAIAPI(apiKey, model, systemPrompt, temperature, retryCount = 0) {
     const url = 'https://api.openai.com/v1/chat/completions';
     
     const requestBody = {
@@ -506,6 +514,14 @@ async function callOpenAIAPI(apiKey, model, systemPrompt, temperature) {
         },
         body: JSON.stringify(requestBody)
     });
+
+    if (response.status === 429) {
+        if (retryCount < 3) {
+            addLogEntry('system', `OpenAI Rate Limit (429) hit. Waiting 10 seconds to retry... (Attempt ${retryCount + 1}/3)`);
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            return callOpenAIAPI(apiKey, model, systemPrompt, temperature, retryCount + 1);
+        }
+    }
 
     if (!response.ok) {
         const errText = await response.text();
