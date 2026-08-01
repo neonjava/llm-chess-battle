@@ -90,19 +90,37 @@ function updateProviderModels(playerNum) {
 p1TempEl.addEventListener('input', (e) => p1TempVal.textContent = e.target.value);
 p2TempEl.addEventListener('input', (e) => p2TempVal.textContent = e.target.value);
 
-// Load settings from localStorage if they exist
+// Load settings from localStorage or window.LOCAL_CONFIG if they exist
 window.addEventListener('DOMContentLoaded', () => {
-    // Initial populate
-    updateProviderModels(1);
-    updateProviderModels(2);
-    
-    if (localStorage.getItem('p1_provider')) {
-        p1ProviderEl.value = localStorage.getItem('p1_provider');
+    if (window.LOCAL_CONFIG) {
+        if (window.LOCAL_CONFIG.p1_provider) {
+            p1ProviderEl.value = window.LOCAL_CONFIG.p1_provider;
+        }
         updateProviderModels(1);
-    }
-    if (localStorage.getItem('p2_provider')) {
-        p2ProviderEl.value = localStorage.getItem('p2_provider');
+        if (window.LOCAL_CONFIG.p1_key) {
+            p1ApiKeyEl.value = window.LOCAL_CONFIG.p1_key;
+        }
+
+        if (window.LOCAL_CONFIG.p2_provider) {
+            p2ProviderEl.value = window.LOCAL_CONFIG.p2_provider;
+        }
         updateProviderModels(2);
+        if (window.LOCAL_CONFIG.p2_key) {
+            p2ApiKeyEl.value = window.LOCAL_CONFIG.p2_key;
+        }
+    } else {
+        // Initial populate
+        updateProviderModels(1);
+        updateProviderModels(2);
+        
+        if (localStorage.getItem('p1_provider')) {
+            p1ProviderEl.value = localStorage.getItem('p1_provider');
+            updateProviderModels(1);
+        }
+        if (localStorage.getItem('p2_provider')) {
+            p2ProviderEl.value = localStorage.getItem('p2_provider');
+            updateProviderModels(2);
+        }
     }
     
     createInitialBoard();
