@@ -606,19 +606,35 @@ function renderPGNHistory() {
         return;
     }
     
+    const table = document.createElement('table');
+    table.className = 'pgn-table';
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>White</th>
+                <th>Black</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    `;
+    
+    const tbody = table.querySelector('tbody');
     for (let i = 0; i < history.length; i += 2) {
         const moveNum = Math.floor(i / 2) + 1;
         const whiteMove = history[i];
         const blackMove = history[i + 1] || '';
         
-        const row = document.createElement('div');
-        row.className = 'pgn-row';
-        row.innerHTML = `
-            <span class="pgn-num">${moveNum}.</span>
-            <span class="pgn-move">${whiteMove}</span>
-            <span class="pgn-move">${blackMove}</span>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${moveNum}</strong></td>
+            <td>${whiteMove}</td>
+            <td>${blackMove}</td>
         `;
-        pgnHistory.appendChild(row);
+        tbody.appendChild(tr);
     }
+    
+    pgnHistory.appendChild(table);
     pgnHistory.scrollTop = pgnHistory.scrollHeight;
 }
