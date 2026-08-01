@@ -330,6 +330,11 @@ async function makeNextAIMove() {
     
     addLogEntry('system', `${prefix} Engine (${provider.toUpperCase()}) is analyzing...`);
     
+    // Disable UI controls while waiting for API responses
+    btnNext.disabled = true;
+    btnAutoplay.disabled = true;
+    btnReset.disabled = true;
+
     try {
         const legalMoves = game.moves();
         const fen = game.fen();
@@ -418,6 +423,15 @@ Format your output exactly as JSON:
         console.error(err);
         addLogEntry('system', `Error executing move for ${prefix}: ${err.message}`);
         stopAutoplay();
+    } finally {
+        // Re-enable UI controls
+        if (game) {
+            btnReset.disabled = false;
+            if (!game.game_over() && !isAutoplayActive) {
+                btnNext.disabled = false;
+                btnAutoplay.disabled = false;
+            }
+        }
     }
 }
 
