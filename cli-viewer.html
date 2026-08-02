@@ -1,0 +1,56 @@
+<link rel="stylesheet"
+    href="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.css"
+    integrity="sha384-47VeTDpmy4yT21gKPXQcLQYQZwlmz27gEH5NTrOmTk3G/SGvMyltclOW/Q8uE+sL"
+    crossorigin="anonymous">
+<script src="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.js"
+    integrity="sha384-/KwQCjA1GWovZNV3QDVtvSMDzO4reGgarF/RqHipr7hIUElH3r5zNl9WEPPOBRIF"
+    crossorigin="anonymous"></script>
+
+<style>
+body, html, div {
+    border: 0;
+    padding: 0;
+}
+#board {
+    width: 100%;
+}
+#gemini, #chatgpt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    font: bold 1.25em system-ui, sans-serif;
+}
+#gemini img, #chatgpt img {
+    width: 2em;
+    height: 2em;
+    padding: 30px 0;
+}
+</style>
+
+<div id="gemini">
+    <img src="images/gemini-logo.svg" alt="Google Gemini">
+    <span>Gemini</span>
+</div>
+<div id="board"></div>
+<div id="chatgpt">
+    <img src="images/openai-chatgpt-logo.svg" alt="OpenAI ChatGPT">
+    <span>ChatGPT</span>
+</div>
+<script src="pubnub.js"></script>
+<script>
+    const GAME_CHANNEL = "chess-battle";
+    const pubnub = PubNub({});
+    const board = Chessboard2('board', 'start');
+    pubnub.subscribe({
+        channel : GAME_CHANNEL,
+        messages : update_board,
+        timetoken: '0',
+    });
+    function update_board(move) {
+        console.log(move);
+        board.move(move);
+    }
+    //console.log(board.fen());
+    //console.log(board.position());
+</script>
