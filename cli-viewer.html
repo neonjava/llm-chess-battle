@@ -7,12 +7,26 @@
     crossorigin="anonymous"></script>
 
 <style>
-body, html, div {
-    border: 0;
+body, html {
+    margin: 0;
     padding: 0;
+    background-color: #ffffff;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: system-ui, sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
 }
 #board {
     width: 100%;
+    max-width: 480px;
+    border: 2px solid #333333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 #gemini, #chatgpt {
     display: flex;
@@ -20,11 +34,13 @@ body, html, div {
     justify-content: center;
     gap: 0.5em;
     font: bold 1.25em system-ui, sans-serif;
+    width: 100%;
+    max-width: 480px;
 }
 #gemini img, #chatgpt img {
     width: 2em;
     height: 2em;
-    padding: 30px 0;
+    padding: 15px 0;
 }
 </style>
 
