@@ -1,72 +1,181 @@
-<link rel="stylesheet"
-    href="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.css"
-    integrity="sha384-47VeTDpmy4yT21gKPXQcLQYQZwlmz27gEH5NTrOmTk3G/SGvMyltclOW/Q8uE+sL"
-    crossorigin="anonymous">
-<script src="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.js"
-    integrity="sha384-/KwQCjA1GWovZNV3QDVtvSMDzO4reGgarF/RqHipr7hIUElH3r5zNl9WEPPOBRIF"
-    crossorigin="anonymous"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Simulation Viewer</title>
+    <link rel="stylesheet"
+        href="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.css"
+        integrity="sha384-47VeTDpmy4yT21gKPXQcLQYQZwlmz27gEH5NTrOmTk3G/SGvMyltclOW/Q8uE+sL"
+        crossorigin="anonymous">
+    <script src="https://unpkg.com/@chrisoakman/chessboard2@0.5.0/dist/chessboard2.min.js"
+        integrity="sha384-/KwQCjA1GWovZNV3QDVtvSMDzO4reGgarF/RqHipr7hIUElH3r5zNl9WEPPOBRIF"
+        crossorigin="anonymous"></script>
 
-<style>
-body, html {
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff;
-}
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    font-family: system-ui, sans-serif;
-    padding: 20px;
-    box-sizing: border-box;
-}
-#board {
-    width: 100%;
-    max-width: 480px;
-    border: 2px solid #333333;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-#gemini, #chatgpt {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    font: bold 1.25em system-ui, sans-serif;
-    width: 100%;
-    max-width: 480px;
-}
-#gemini img, #chatgpt img {
-    width: 2em;
-    height: 2em;
-    padding: 15px 0;
-}
-</style>
-
-<div id="gemini">
-    <img src="images/gemini-logo.svg" alt="Google Gemini">
-    <span>Gemini</span>
-</div>
-<div id="board"></div>
-<div id="chatgpt">
-    <img src="images/openai-chatgpt-logo.svg" alt="OpenAI ChatGPT">
-    <span>ChatGPT</span>
-</div>
-<script src="pubnub.js"></script>
-<script>
-    const GAME_CHANNEL = "chess-battle";
-    const pubnub = PubNub({});
-    const board = Chessboard2('board', 'start');
-    pubnub.subscribe({
-        channel : GAME_CHANNEL,
-        messages : update_board,
-        timetoken: '0',
-    });
-    function update_board(move) {
-        console.log(move);
-        board.move(move);
+    <style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
     }
-    //console.log(board.fen());
-    //console.log(board.position());
-</script>
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'Courier New', Courier, monospace;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    .main-container {
+        display: flex;
+        flex-direction: row;
+        gap: 30px;
+        align-items: stretch;
+        max-width: 1000px;
+        width: 100%;
+    }
+    .board-side {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+    #board {
+        width: 100%;
+        max-width: 440px;
+        border: 2px solid #333333;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    #gemini, #chatgpt {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+        font: bold 1.1em system-ui, sans-serif;
+        width: 100%;
+        max-width: 440px;
+    }
+    #gemini img, #chatgpt img {
+        width: 1.8em;
+        height: 1.8em;
+        padding: 10px 0;
+    }
+    
+    /* Console Side */
+    .console-side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border: 2px solid #333333;
+        background-color: #1a1a1a;
+        color: #00ff00;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        min-height: 480px;
+    }
+    .console-header {
+        font-weight: bold;
+        border-bottom: 1px solid #333333;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+    }
+    .console-logs {
+        flex-grow: 1;
+        overflow-y: auto;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        max-height: 440px;
+    }
+    .log-line {
+        margin-bottom: 6px;
+    }
+    .log-white {
+        color: #ffffff;
+    }
+    .log-black {
+        color: #8bb2f4;
+    }
+    .log-system {
+        color: #aaaaaa;
+    }
+    @media (max-width: 900px) {
+        .main-container {
+            flex-direction: column;
+            align-items: center;
+        }
+        .console-side {
+            width: 100%;
+            max-width: 440px;
+            min-height: 300px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Board Side -->
+        <div class="board-side">
+            <div id="gemini">
+                <img src="images/gemini-logo.svg" alt="Google Gemini">
+                <span>Gemini (Black)</span>
+            </div>
+            <div id="board"></div>
+            <div id="chatgpt">
+                <img src="images/gemini-logo.svg" alt="Google Gemini">
+                <span>Gemini (White)</span>
+            </div>
+        </div>
+
+        <!-- Console Side -->
+        <div class="console-side">
+            <div class="console-header">
+                <span>>_ Terminal Console</span>
+                <span style="color: #aaaaaa;">Active</span>
+            </div>
+            <div class="console-logs" id="console-logs">
+                <div class="log-line log-system">Console initialized. Waiting for game.py moves...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="pubnub.js"></script>
+    <script>
+        const GAME_CHANNEL = "chess-battle";
+        const pubnub = PubNub({});
+        const board = Chessboard2('board', 'start');
+        const logsEl = document.getElementById('console-logs');
+        
+        let moveCount = 0;
+
+        pubnub.subscribe({
+            channel : GAME_CHANNEL,
+            messages : update_board,
+            timetoken: '0',
+        });
+
+        function update_board(move) {
+            console.log("Move received:", move);
+            board.move(move);
+
+            moveCount++;
+            const isWhite = moveCount % 2 !== 0;
+            const fullMoveNum = Math.floor((moveCount - 1) / 2) + 1;
+            
+            const logLine = document.createElement('div');
+            logLine.className = `log-line ${isWhite ? 'log-white' : 'log-black'}`;
+            
+            const playerPrefix = isWhite ? 'White (Gemini)' : 'Black (Gemini)';
+            logLine.innerHTML = `[${new Date().toLocaleTimeString()}] Move #${fullMoveNum} - <strong>${playerPrefix}</strong>: ${move}`;
+            
+            logsEl.appendChild(logLine);
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+    </script>
+</body>
+</html>
