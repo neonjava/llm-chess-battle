@@ -83,6 +83,33 @@
         font-size: 0.9rem;
         display: flex;
         justify-content: space-between;
+        align-items: center;
+    }
+    .sim-controls {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-sim {
+        background-color: #222;
+        color: #00ff00;
+        border: 1px solid #00ff00;
+        padding: 3px 10px;
+        font-family: monospace;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-transform: uppercase;
+    }
+    .btn-sim:hover {
+        background-color: #00ff00;
+        color: #000000;
+    }
+    .btn-sim:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        border-color: #444;
+        color: #444;
+        background-color: #111;
     }
     .console-logs {
         flex-grow: 1;
@@ -136,10 +163,13 @@
         <div class="console-side">
             <div class="console-header">
                 <span>>_ Terminal Console</span>
-                <span style="color: #aaaaaa;">Active</span>
+                <div class="sim-controls">
+                    <button id="btn-sim-start" class="btn-sim" onclick="startSimulation()">Start</button>
+                    <button id="btn-sim-stop" class="btn-sim" onclick="stopSimulation()">Stop</button>
+                </div>
             </div>
             <div class="console-logs" id="console-logs">
-                <div class="log-line log-system">Console initialized. Waiting for game.py moves...</div>
+                <div class="log-line log-system">Console initialized. Ready to control game.py simulation.</div>
             </div>
         </div>
     </div>
@@ -176,6 +206,57 @@
             logsEl.appendChild(logLine);
             logsEl.scrollTop = logsEl.scrollHeight;
         }
+
+        async function startSimulation() {
+            try {
+                const res = await fetch('/api/start', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    addSystemLog("Simulation process started successfully.");
+                } else {
+                    addSystemLog("Error: " + data.message);
+                }
+            } catch (err) {
+                addSystemLog("Network error starting simulation.");
+            }
+            updateStatus();
+        }
+
+        async function stopSimulation() {
+            try {
+                const res = await fetch('/api/stop', { method: 'POST' });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    addSystemLog("Simulation process stopped.");
+                } else {
+                    addSystemLog("Error: " + data.message);
+                }
+            } catch (err) {
+                addSystemLog("Network error stopping simulation.");
+            }
+            updateStatus();
+        }
+
+        async function updateStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('btn-sim-start').disabled = data.running;
+                document.getElementById('btn-sim-stop').disabled = !data.running;
+            } catch (err) {}
+        }
+
+        function addSystemLog(text) {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line log-system';
+            logLine.textContent = `[System] ${text}`;
+            logsEl.appendChild(logLine);
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        // Periodically poll status
+        setInterval(updateStatus, 3000);
+        updateStatus();
     </script>
 </body>
 </html>
