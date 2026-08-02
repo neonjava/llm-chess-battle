@@ -117,7 +117,7 @@ class Gemini():
 
 class Game():
     def __init__(self):
-        self.players = {chess.WHITE: ChatGPT(), chess.BLACK: Gemini()}
+        self.players = {chess.WHITE: Gemini(), chess.BLACK: Gemini()}
         self.board = chess.Board()
 
     def over(self):
