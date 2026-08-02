@@ -182,6 +182,7 @@
         const logsEl = document.getElementById('console-logs');
         
         let moveCount = 0;
+        let appliedMoves = [];
 
         pubnub.subscribe({
             channel : GAME_CHANNEL,
@@ -190,6 +191,10 @@
         });
 
         function update_board(move) {
+            // Prevent applying duplicate moves (especially when syncing)
+            if (appliedMoves.includes(move)) return;
+            appliedMoves.push(move);
+
             console.log("Move received:", move);
             board.move(move);
 
@@ -212,6 +217,11 @@
                 const res = await fetch('/api/start', { method: 'POST' });
                 const data = await res.json();
                 if (data.status === 'success') {
+                    // Reset local state on start
+                    board.position('start');
+                    logsEl.innerHTML = '<div class="log-line log-system">Console initialized. Ready to control game.py simulation.</div>';
+                    moveCount = 0;
+                    appliedMoves = [];
                     addSystemLog("Simulation process started successfully.");
                 } else {
                     addSystemLog("Error: " + data.message);
@@ -246,6 +256,21 @@
             } catch (err) {}
         }
 
+        async function syncGameHistory() {
+            try {
+                const res = await fetch('/api/moves');
+                const data = await res.json();
+                if (data.moves && data.moves.length > 0) {
+                    data.moves.forEach(m => {
+                        update_board(m);
+                    });
+                    addSystemLog(`Synced ${data.moves.length} moves from current session.`);
+                }
+            } catch (err) {
+                console.error("Failed to sync moves:", err);
+            }
+        }
+
         function addSystemLog(text) {
             const logLine = document.createElement('div');
             logLine.className = 'log-line log-system';
@@ -254,9 +279,10 @@
             logsEl.scrollTop = logsEl.scrollHeight;
         }
 
-        // Periodically poll status
+        // Initialize status and sync
         setInterval(updateStatus, 3000);
         updateStatus();
+        syncGameHistory();
     </script>
 </body>
 </html>

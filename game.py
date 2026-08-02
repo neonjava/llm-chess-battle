@@ -140,7 +140,9 @@ class Game():
 
 game = Game()
 while not game.over():
-    publish(GAME_CHANNEL, game.move())
+    move_str = game.move()
+    print(f"MOVE_PLAYED:{move_str}", flush=True)
+    publish(GAME_CHANNEL, move_str)
 
 print(f"Game over: {game.board.result()} ({game.board.outcome().termination.name})")
 print(game.winner())
